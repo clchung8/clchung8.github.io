@@ -1,18 +1,141 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
 
-    <title>Example Student's HCDE 439 Physical Computing Page!</title>
+  <title>Christian Chung's HCDE 439 Physical Computing Page!</title>
 
-    <link href="style.css" rel="stylesheet" type="text/css" />
-  </head>
-  <body>
-    <h1>Example Student's Assignment 1!</h1>
-    <div class="header">
-      <img src="red-panda.jpg" />
-      <p>Here is all the documentation for assignment 1!</p>
-    </div>
-  </body>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .section img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 10px 0;
+    }
+
+    .caption {
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 5px;
+      font-style: italic;
+      text-align: center;
+    }
+
+    code {
+      background-color: #f4f4f4;
+      padding: 10px;
+      display: block;
+      border-radius: 5px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Christian Chung's Assignment 1!</h1>
+
+  <!-- GIF Section -->
+  <div class="section">
+    <h2>Blink! Animation</h2>
+    <img src="blinkGif.gif" alt="Blink Animation" />
+    <p class="caption">A demonstration of the LED blinking pattern.</p>
+  </div>
+
+  <!-- Schematic Section -->
+  <div class="section">
+    <h2>Schematic</h2>
+    <img src="blinkSchematic.png" alt="Schematic Image" />
+    <p class="caption">Wiring schematic for the LED blink circuit.</p>
+  </div>
+
+  <!-- Circuit Section -->
+  <div class="section">
+    <h2>Circuit</h2>
+    <img src="blinkCircuit.png" alt="Circuit Image" />
+    <p class="caption">Physical circuit layout.</p>
+  </div>
+
+  <!-- Code Section -->
+  <div class="section">
+    <h2>Code Snippet</h2>
+    <pre><code>
+// pin assignments
+const int greenLED = 6;
+const int yellowLED = 4;
+const int redLED = 2;
+
+// Delay time (in milliseconds)
+const int interval = 1000;  // 1 second
+
+void setup() {
+  pinMode(greenLED, OUTPUT);
+  pinMode(yellowLED, OUTPUT);
+  pinMode(redLED, OUTPUT);
+}
+
+void loop() {
+  // turn on green, turn off others
+  digitalWrite(greenLED, HIGH);
+  digitalWrite(yellowLED, LOW);
+  digitalWrite(redLED, LOW);
+  delay(interval);
+
+  // turn on yellow, turn off others
+  digitalWrite(greenLED, LOW);
+  digitalWrite(yellowLED, HIGH);
+  digitalWrite(redLED, LOW);
+  delay(interval);
+
+  // turn on red, turn off others
+  digitalWrite(greenLED, LOW);
+  digitalWrite(yellowLED, LOW);
+  digitalWrite(redLED, HIGH);
+  delay(interval);
+}
+    </code></pre>
+    <p class="caption">Arduino code used to cycle the green, yellow, and red LEDs.</p>
+  </div>
+
+  <!-- Reflection Section -->
+  <div class="section">
+    <h2>Reflection</h2>
+
+    <p style="text-indent: 2em;">
+      The voltage across each LED changes over time depending on which one is active.
+    </p>
+
+    <img src="blinkGraph.jpg" alt="Blink Graph" />
+    <p class="caption">Graph showing voltage across each LED over time. Each LED alternates on and off with a 1-second interval.</p>
+
+    <p style="text-indent: 2em;">
+      An Arduino Uno can control up to fourteen LEDs independently, one per I/O pin. Each LED draws about fifteen milliamps of current through its resistor, so driving all fourteen at the same time would total around two hundred ten milliamps.
+    </p>
+
+    <p style="text-indent: 2em;">
+      Humans can only really distinguish movements up until 60 hertz. This corresponds to a blink period of roughly twenty milliseconds. When blinking faster than that, the LEDs appear continuously lit, because the switching happens too quickly for our vision to separate the individual flashes.
+    </p>
+
+    <p style="text-indent: 2em;">
+      I used AI tools, specifically ChatGPT, for assistance with formatting this webpage clearly.
+    </p>
+  </div>
+</body>
 </html>

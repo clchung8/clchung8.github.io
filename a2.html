@@ -1,18 +1,216 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
 
-    <title>Example Student's HCDE 439 Physical Computing Page!</title>
+  <title>Christian Chung's HCDE 439 Physical Computing Page!</title>
 
-    <link href="style.css" rel="stylesheet" type="text/css" />
-  </head>
-  <body>
-    <h1>Example Student's Assignment 2!</h1>
-    <div class="header">
-      <img src="red-panda.jpg" />
-      <p>Here is all the documentation for assignment 2!</p>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    h3 {
+      text-align: center;
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .section img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 10px 0;
+    }
+
+    .caption {
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 5px;
+      font-style: italic;
+      text-align: center;
+    }
+
+    code {
+      background-color: #f4f4f4;
+      padding: 10px;
+      display: block;
+      border-radius: 5px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    .image-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .image-row img {
+      width: 48%;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Christian Chung's Assignment 2!</h1>
+
+  <!-- Overview Section -->
+  <div class="section">
+    <h2>Overview</h2>
+    <p style="text-indent: 2em;">
+      This project demonstrates a fading RGB LED controlled by an Arduino and a pushbutton. When the button is pressed, the LED smoothly transitions through red, green, and blue colors using PWM (analogWrite). The circuit includes current-limiting resistors for each LED to protect them and a pull-up resistor for the button to ensure reliable input detection. The goal of this assignment is to combine hardware and software concepts including digitalWrite, digitalRead, analogWrite, for-loops, and user input to control multiple LEDs.
+    </p>
+  </div>
+
+  <!-- GIF Section -->
+  <div class="section">
+    <h2>Fade! Animation</h2>
+    <img src="./Media/a2Gif.gif" alt="RGB Fade Animation" />
+    <p class="caption">
+      A demonstration of the RGB bulb fading through color transitions when button is held.
+    </p>
+  </div>
+
+  <!-- Schematic Section -->
+  <div class="section">
+    <h2>Schematic</h2>
+    <img src="./Media/a2schematic.png" alt="Schematic Image" />
+    <p class="caption">
+      Wiring schematic for the LED blink circuit.
+    </p>
+  </div>
+
+  <!-- Circuit Section -->
+  <div class="section">
+    <h2>Circuit</h2>
+    <div class="image-row">
+      <img src="./Media/a2circuit.png" alt="Circuit Image" />
+      <img src="./Media/a2arduino.png" alt="Schematic Image" />
     </div>
-  </body>
+    <p class="caption">
+      Breadboard (left) and Arduino ports (right) layout side by side for comparison.
+    </p>
+
+    <h3>Determining Bulb Resistors</h3>
+    <p style="text-indent: 2em;">
+      To determine the appropriate resistors for the RGB LED, I used Ohm's Law: V = I * R. First, I noted the forward voltage drop of each LED: red and green LEDs have a 1.8 V drop, and the blue LED has a 3.3 V drop. I also decided on a safe current of approximately 20 mA per LED. Using Ohm's Law, I calculated the resistor values needed to limit current from the 5 V Arduino supply: for the red and green LEDs, R = (5 V - 1.8 V) / 0.02 A = ~160 Ω. For the blue LED, R = (5 V - 3.3 V) / 0.02 A = ~85 Ω.  
+    </p>
+    <p style="text-indent: 2em;">
+      For simplicity and to preserve materials, I chose to use a 220 Ω resistor for all three LEDs. While this made the blue LED slightly dimmer than the red and green, it was still plenty bright for the project. This approach ensured safe operation of all LEDs while keeping the circuit easy to assemble and materials minimal.
+    </p>
+
+    <h3>Pull-up Resistor</h3>
+    <p style="text-indent: 2em;">
+      A 10 kΩ resistor is used with the pushbutton to ensure that when the button is not pressed, the input pin reads a definite LOW (0 V) instead of floating, which could cause some erratic behavior. When the button is pressed, the pin is connected to 5 V, registering a HIGH signal, allowing the Arduino to reliably detect the button state.
+    </p>
+  </div>
+
+  <!-- Code Section -->
+  <div class="section">
+    <h2>Arduino Code Snippet</h2>
+    <pre><code>
+// pin assignments
+int redPin = 3;
+int greenPin = 5;
+int bluePin = 6;
+int buttonPin = 2;
+
+// setup
+void setup() {
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+  pinMode(buttonPin, INPUT);
+}
+
+// function -> set LED color
+void setColor(int r, int g, int b) {
+  analogWrite(redPin, r);
+  analogWrite(greenPin, g);
+  analogWrite(bluePin, b);
+}
+
+void loop() {
+  // read button
+  int buttonState = digitalRead(buttonPin);
+
+  // if button is held -> fade colors
+  if (buttonState == HIGH) {
+    // fade red -> green -> blue continuously while pressed
+    for (int i = 0; i < 255; i++) {
+      if (digitalRead(buttonPin) == LOW) return; // stop immediately if released
+      setColor(255 - i, i, 0);
+      delay(5);
+    }
+
+    for (int i = 0; i < 255; i++) {
+      if (digitalRead(buttonPin) == LOW) return;
+      setColor(0, 255 - i, i);
+      delay(5);
+    }
+
+    for (int i = 0; i < 255; i++) {
+      if (digitalRead(buttonPin) == LOW) return;
+      setColor(i, 0, 255 - i);
+      delay(5);
+    }
+  } 
+  else {
+    // if not pressed -> turn LED off
+    setColor(0, 0, 0);
+  }
+}`
+    </code></pre>
+    <p class="caption">
+      Arduino code used to initiate fading RGB bulb sequence when pushbutton is held.
+    </p>
+  </div>
+
+  <!-- Reflection Section -->
+  <div class="section">
+    <h2>Reflection</h2>
+
+    <h3>1: Voltage Chart for AnalogWrite Levels</h3>
+    <p style="text-indent: 2em;">
+      Below, I sketched a chart to visualize the effect of PWM on LED brightness. Three lines represent the voltage across an LED for different analogWrite values: 64, 128, and 255. The line for analogWrite(64) fluctuates at a low duty cycle, analogWrite(128) at a medium duty cycle, and analogWrite(255) stays at a nearly constant high voltage. This demonstrates how PWM controls the perceived brightness of the LED by rapidly switching it on and off, effectively modulating the average voltage over time.
+    </p>
+    <img src="./Media/a2graph.png" alt="Voltage chart showing PWM levels for LED" />
+    <p class="caption">
+      Chart illustrating PWM voltage levels across an LED for analogWrite values of 64, 128, and 255.
+    </p>
+
+    <h3>2: Battery Life Estimation</h3>
+    <p style="text-indent: 2em;">
+      Using the schematic, circuit, and firmware, I assumed the only current draw comes from the LEDs. Each LED channel draws around 15 mA at full brightness. With three channels, the total current is 45 mA. Given a 1200 mAh battery, the worst-case battery life is calculated as: 1200 mAh / 45 mA = ~26.7 hours. During fading, the LEDs are on at varying duty cycles, averaging about half the full current (~22.5 mA), so the battery could last probably 53 hours.
+    </p>
+
+    <h3>3: Actual LED Voltage Measurement</h3>
+    <p style="text-indent: 2em;">
+      I measured the voltage across one of the LEDs while it was on, and the red LED measured approximately 1.8 V, which matches its theoretical forward voltage. The blue LED, with a 220 Ω resistor, measured about 2.8 V, slightly lower than its typical forward voltage of 3.3 V which is likely due to the resistor limiting the current. These measurements confirm that the LEDs are operating safely, and the voltage drop aligns closely with expectations based on the resistor selection.
+    </p>
+
+    <h3>4: Use of AI Tools</h3>
+    <p style="text-indent: 2em;">
+      I used ChatGPT to help organize and format my webpage. While AI helped improve clarity and presentation, all calculations, measurements, and circuit assembly were done manually. This approach pushed both my efficiency and my understanding of the assignment.
+    </p>
+  </div>
+</body>
 </html>

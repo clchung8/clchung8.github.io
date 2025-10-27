@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+  <title>Photoresistor Circuit Project</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fafafa;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1, h2, h3 {
+      color: #222;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      display: block;
+      margin: 0 auto;
+    }
+
+    h1 + img {
+      width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+      margin-bottom: 20px;
+      border-radius: 12px;
+    }
+
+    .image-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .image-row img {
+      width: 32%;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    .placeholder {
+      background: #ddd;
+      color: #555;
+      text-align: center;
+      padding: 30px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>A3: Libraries!</h1>
+  <h2>Distance-dependent RGB light, with a LCD text display for distnace and temperature!</h2>
+
+  <div class="container">
+    <h2>Overview</h2>
+    <img src="./Media/a4Gif.gif" alt="Animated GIF of circuit in action">
+    <p>
+      This project uses an HC-SR04 ultrasonic sensor and a DHT11 temperature sensor as inputs, and an RGB LED as an output to visualize the distance of an object.
+      An LCD (QAPASS 1602A) displays both the current distance and temperature reading.
+      As an object moves closer, the LED transitions smoothly from red (far) to green (near), showing a range of yellow and orange hues in between.
+      The LCD also shows “N/A” when no object is detected within range.
+    </p>
+  </div>
+
+  <div class="container">
+    <h2>Schematic Diagram</h2>
+    <img src="./Media/a4schematic.png" alt="Diagram of the circuit schematic">
+  </div>
+
+  <div class="container">
+    <h2>Circuit Images</h2>
+    <div class="image-row">
+      <img src="./Media/a4circuit.png" alt="Circuit image 1">
+      <img src="./Media/a4bread.png" alt="Breadboard layout image 2"
+           style="transform: rotate(-90deg); width: auto; height: 400px; object-fit: contain; display: block; margin: 0 auto;">
+      <img src="./Media/a4pins.png" alt="Arduino Pin Assignment image 3">
+    </div>
+
+    <p><b>Calculations:</b></p>
+    <p>
+      For this circuit, I used the same resistor values for the RGB bulb as in my previous assignment since those calculations already ensured
+      that each LED color stayed safely below 20 mA, allowing for continuous and stable operation. I also used a 10 kΩ resistor for the 
+      LCD screen to help control the contrast and brightness of the display. This resistor limits the voltage reaching the LCD’s contrast pin (V0),
+      making the white blocks dimmer and allowing the text to appear sharper and more readable under different lighting conditions.
+    </p>
+  </div>
+
+  <div class="container">
+  <h2>Arduino Code</h2>
+  <pre><code>
+#include //NewPing.h
+#include //LiquidCrystal.h
+#include //DHT.h
+
+// pin setup
+#define TRIG_PIN 12
+#define ECHO_PIN 13
+#define MAX_DISTANCE 400  // sensor max distance
+#define RED_PIN 9
+#define GREEN_PIN 10
+#define DHTPIN 11
+#define DHTTYPE DHT11
+
+// initialize sensor objects
+NewPing sonar(TRIG_PIN, ECHO_PIN, MAX_DISTANCE);
+LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
+DHT dht(DHTPIN, DHTTYPE);
+
+void setup() {
+  lcd.begin(16, 2);
+  dht.begin();
+  pinMode(RED_PIN, OUTPUT);
+  pinMode(GREEN_PIN, OUTPUT);
+}
+
+void loop() {
+  // read ultrasonic distance
+  unsigned int uS = sonar.ping_median(3);
+  float distance = (uS / 2.0) * 0.0343; // convert to cm
+
+  // read temperature
+  float temp = dht.readTemperature();
+
+  lcd.clear();
+
+  // distance display
+  lcd.setCursor(0, 0);
+  lcd.print("Dist: ");
+  if (uS == 0 || distance > 30 || distance <= 0) {
+    lcd.print("N/A");
+  } else {
+    lcd.print((int)distance);
+    lcd.print(" cm");
+  }
+
+  // temperature display
+  lcd.setCursor(0, 1);
+  if (isnan(temp)) {
+    lcd.print("Temp: Error");
+  } else {
+    lcd.print("Temp: ");
+    lcd.print(temp, 2);  // 2 decimal places
+    lcd.print(" C");
+  }
+
+  // LED
+  if (uS == 0 || distance > 30 || distance <= 0) {
+    analogWrite(RED_PIN, 0);
+    analogWrite(GREEN_PIN, 0);
+  } else {
+    distance = constrain(distance, 5, 30);
+    float ratio = (distance - 5.0) / (30.0 - 5.0);
+
+    int red = pow(ratio, 0.5) * 255;        // red increases as it gets farther
+    int green = pow(1 - ratio, 2.2) * 255;  // green increases as it gets closer
+
+    analogWrite(RED_PIN, red);
+    analogWrite(GREEN_PIN, green);
+  }
+}
+  </code></pre>
+</div>
+
+  <div class="container">
+  <h2>Additional Questions</h2>
+
+  <h3>1: Draw a graph with the x-axis as time and the y-axis as voltage at pin 9 with respect to ground.</h3>
+  <img src="./Media/a4graph.png" alt="Voltage chart showing Voltage of Servo vs. Time" />
+    <p class="caption">
+      Chart illustrating PWM voltage levels across an LED for analogWrite values of 64, 128, and 255.
+    </p>
+  <p>
+    A servo motor interprets position based on the width of a control pulse sent every 20 ms (50 Hz).
+    Each pulse carries a short 5 V HIGH signal lasting between 1.0 ms and 2.0 ms, which corresponds to the servo angle.
+    A 1.0 ms pulse tells the servo to move to 0°, a 1.5 ms pulse to 90°, and a 2.0 ms pulse to 180°.
+    The rest of the 20 ms frame remains LOW, maintaining a consistent signal frequency.
+    As shown in the graph, the pulses widen as the angle increases, encoding position through pulse width modulation (PWM) rather than voltage level.
+  </p>
+
+  <h3>2: Your input device is slightly broken, leading it to give an erroneous reading 1% of the time. How can we address this? (Pseudo code)</h3>
+  <p>
+    To address random incorrect readings, we can take multiple measurements and compare them, using either the median or an average to reduce the impact of outliers:
+  </p>
+  <pre>
+Function getAverageReading(sensorPin):
+    Set N to 10 readings
+    Set total to 0
+
+    For i from 0 to N-1:
+        Read current sensor value from sensorPin
+        Add value to total
+        Delay 10 ms to avoid taking identical readings
+    End for
+
+    average = total / N
+    Return average
+End function
+  </pre>
+  <p>
+    This ensures that if one value (about 1% of readings) is incorrect, it will have minimal impact on the final result.
+  </p>
+
+  <h3>3: Your input device is slightly noisy, leading the measurement to randomly deviate from the true measurement up or down by 10%. How can we address this? (Pseudo code)</h3>
+  <p>
+    To smooth out noisy data, we can implement a moving average filter that continuously averages several recent readings:
+  </p>
+  <pre>
+Set numReadings to 10
+Create array readings[numReadings]
+Set index to 0
+Set total to 0
+
+Function smoothInput():
+    // Remove the oldest reading from total
+    total = total - readings[index]
+    
+    // Take a new sensor reading
+    readings[index] = analogRead(A0)
+    
+    // Add the new reading to total
+    total = total + readings[index]
+    
+    // Move index to the next position (loop back to 0 after last)
+    index = (index + 1) modulo numReadings
+    
+    // Calculate and return the average value
+    Return total / numReadings
+End function
+  </pre>
+  <p>
+    This method reduces short-term fluctuations by averaging data, providing a steadier and more reliable signal.
+  </p>
+
+  <h3>4: Did you use AI tools in completing this assignment?</h3>
+  <p>
+    I did use AI tools to help ideate and debug portions of my arduino code, but the overall structure and logic were developed by me,
+    using examples on line as a reference.
+  </p>
+</div>
+</body>
+</html>

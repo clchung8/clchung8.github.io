@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+  <title>Transistor Control Circuit Project</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fafafa;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1, h2, h3 {
+      color: #222;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      display: block;
+      margin: 0 auto;
+    }
+    h1 + img {
+      width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+      margin-bottom: 20px;
+      border-radius: 12px;
+    }
+    .image-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .image-row img {
+      width: 32%;
+      min-width: 250px;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    code {
+      font-family: 'Courier New', monospace;
+    }
+    .placeholder {
+      background: #ddd;
+      color: #555;
+      text-align: center;
+      padding: 30px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .caption {
+      font-style: italic;
+      color: #666;
+      text-align: center;
+      margin-top: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    table th {
+      background-color: #f4f4f4;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>A5: Transistor Control!</h1>
+  <h2>IR Remote-Controlled LED Strip with N-MOSFET Transistor</h2>
+
+  <div class="container">
+    <h2>Overview</h2>
+    <p>
+      This project uses an N-MOSFET transistor to control a high-power LED strip 
+      using an IR remote. The Arduino reads commands from the remote and adjusts the brightness of the 
+      LED strip accordingly.
+    </p>
+    <img src="./Media/a5gif.gif" alt="">
+    <p class="caption">Animated GIF of circuit in action - LED strip responding to IR remote control</p>
+    <p>
+      This project uses an IR remote receiver (input sensor with library) to control a high-power 
+      LED strip through an N-MOSFET transistor. The circuit demonstrates the separation 
+      of logic power (5V Arduino) from load power (external 12V supply for the LED strip).
+    </p>
+    <p>
+      The IR remote allows you to:
+    </p>
+    <ul>
+      <li><strong>Power button (code 69):</strong> Toggle the LED strip on/off</li>
+      <li><strong>Up button (code 9):</strong> Increase brightness in steps of 25</li>
+      <li><strong>Down button (code 7):</strong> Decrease brightness in steps of 25</li>
+    </ul>
+    <p>
+      The MOSFET acts as an electronic switch, allowing the low-power Arduino PWM signal (pin 9) to control 
+      the high-power LED strip powered by an external 12V supply. This demonstrates proper transistor-based 
+      power control with separated logic and load circuits.
+    </p>
+  </div>
+
+  <div class="container">
+    <h2>Schematic Diagram</h2>
+    N/A
+    <p class="caption">Circuit schematic showing transistor control of LED strip via IR remote</p>
+    
+    <h3>Key Components:</h3>
+    <table>
+      <tr>
+        <th>Component</th>
+        <th>Purpose</th>
+        <th>Connection</th>
+      </tr>
+      <tr>
+        <td>IR Receiver (VS1838B)</td>
+        <td>Input sensor using IRremote library</td>
+        <td>Signal → Pin 11, VCC → 5V, GND → GND</td>
+      </tr>
+      <tr>
+        <td>N-MOSFET (DMT6009LCT)</td>
+        <td>Electronic switch for high-power load</td>
+        <td>Gate → Pin 9 (via 100Ω resistor), Drain → LED strip, Source → Common GND</td>
+      </tr>
+      <tr>
+        <td>LED Strip (12V)</td>
+        <td>High-load output device</td>
+        <td>+ terminal → 12V supply, - terminal → MOSFET Drain</td>
+      </tr>
+      <tr>
+        <td>External 12V Power Supply</td>
+        <td>Separate load power from logic power</td>
+        <td>+ → LED strip, - → Common GND with Arduino</td>
+      </tr>
+      <tr>
+        <td>100Ω Gate Resistor</td>
+        <td>Current limiting for MOSFET gate</td>
+        <td>Between Arduino Pin 9 and MOSFET Gate</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="container">
+    <h2>Circuit Images</h2>
+    <div class="image-row">
+      <img src="./Media/a5circuit.jpg" alt="">
+    </div>
+
+    <h3>Resistor and Current Calculations:</h3>
+    
+    <h4>100Ω Resistor:</h4>
+    <p>
+      The MOSFET gate is voltage-controlled and draws minimal current in steady state. 
+      However, during switching transitions, there is capacitive charging current due to the gate-source capacitance 
+      (typically 200-400pF for this MOSFET). A 100Ω resistor limits the peak current while still allowing fast switching:
+    </p>
+    <pre>
+Peak gate charging current:
+I_gate_peak = V_PWM / R_gate
+I_gate_peak = 5V / 100Ω = 50mA (during switching transitions)
+
+Average current (steady state):
+I_gate_avg ≈ 0 mA (gate draws no steady-state current once charged)
+    </pre>
+    <p>
+      <strong>Why 50mA peak is acceptable:</strong> Although Arduino pins are rated for 40mA continuous current, 
+      the 50mA peak only occurs for very brief moments (microseconds) during PWM transitions when the gate capacitor 
+      is charging or discharging.
+    </ul>
+    <p>
+
+    <h4>LED Strip Current:</h4>
+    <p>
+      <strong>Specifications:</strong> 12V, ~1.5A maximum (18W)
+    </p>
+    <pre>
+Power calculation:
+P = Voltage × Current
+P = 12V × 1.5A = 18W
+
+At full brightness (analogWrite(255)):
+I_LED = 1.5A flows through MOSFET Drain-Source path
+    </pre>
+    <p>
+      <strong>MOSFET Current Justification:</strong><br>
+      From the DMT6009LCT datasheet:
+    </p>
+    <ul>
+      <li>Continuous Drain Current (I<sub>D</sub>) at 25°C: <strong>60A</strong></li>
+      <li>Our LED strip draws: <strong>1.5A maximum</strong></li>
+      <li>Utilization: 1.5A / 60A = <strong>2.5% of rated capacity</strong></li>
+      <li>Safety margin: <strong>40× overcapacity (97.5% headroom)</strong></li>
+    </ul>
+    <p>
+      The MOSFET operates well within safe limits with substantial headroom. Even if the LED strip drew 
+      3× its rated current (4.5A), the MOSFET would still only be at 7.5% of its maximum rating.
+    </p>
+
+    <h4>Expected Voltages and Currents at Key Points:</h4>
+    <table>
+      <tr>
+        <th>Location</th>
+        <th>Voltage</th>
+        <th>Current</th>
+        <th>Notes</th>
+      </tr>
+      <tr>
+        <td>Arduino Pin 9</td>
+        <td>0V to 5V (PWM)</td>
+        <td>~50mA peak, ~0mA avg</td>
+        <td>PWM signal; peak during transitions only</td>
+      </tr>
+      <tr>
+        <td>After 100Ω Resistor</td>
+        <td>0V to ~4.95V</td>
+        <td>~50mA peak, ~0mA avg</td>
+        <td>Minimal voltage drop (50mA × 100Ω = 5V during peak)</td>
+      </tr>
+      <tr>
+        <td>MOSFET Gate</td>
+        <td>0V to ~4.95V</td>
+        <td>< 1µA (steady state)</td>
+        <td>Nearly full 5V drive for strong saturation</td>
+      </tr>
+      <tr>
+        <td>LED Strip (+)</td>
+        <td>12V</td>
+        <td>0A to 1.5A</td>
+        <td>From external 12V power supply</td>
+      </tr>
+      <tr>
+        <td>MOSFET Drain</td>
+        <td>~0.15V to 12V</td>
+        <td>0A to 1.5A</td>
+        <td>Low when ON (V = I × R<sub>DS(on)</sub>), 12V when OFF</td>
+      </tr>
+      <tr>
+        <td>MOSFET Source</td>
+        <td>0V (GND)</td>
+        <td>0A to 1.5A</td>
+        <td>Common ground reference</td>
+      </tr>
+      <tr>
+        <td>Common Ground</td>
+        <td>0V</td>
+        <td>1.5A (return path)</td>
+        <td>Shared between Arduino GND and 12V supply GND</td>
+      </tr>
+    </table>
+    
+    <p><strong>Voltage drop calculation across MOSFET when ON:</strong></p>
+    <pre>
+From datasheet: R_DS(on) ≈ 0.1Ω (typical at V_GS = 4.5V)
+
+V_drain = I_drain × R_DS(on)
+V_drain = 1.5A × 0.1Ω = 0.15V
+
+This minimal voltage drop means almost all 12V reaches the LED strip.
+    </pre>
+  </div>
+
+  <div class="container">
+    <h2>Arduino Code</h2>
+    <pre><code>// include library to handle infrared (ir) signals
+#include &lt;IRremote.h&gt;
+
+// define the pin connected to the ir receiver
+#define IR_PIN 11
+
+// define the pin connected to mosfet gate (controls led strip)
+// this pin is initialized as OUTPUT in setup()
+// upon startup, digital pins are in INPUT mode with high impedance
+// once set to OUTPUT, pin 9 starts at LOW (0V) state
+#define LED_PIN 9
+
+// initial brightness level (0–255) - middle range
+int brightness = 128;
+
+// track if led is on or off - starts as off
+bool ledOn = false;
+
+void setup() {
+  // start serial monitor for debugging at 9600 baud rate
+  Serial.begin(9600);
+  
+  // start ir receiver on defined pin with LED feedback enabled
+  IrReceiver.begin(IR_PIN, ENABLE_LED_FEEDBACK);
+  
+  // set led pin as output - transitions from INPUT to OUTPUT mode
+  // pin is now driven and can source/sink current
+  // starts at LOW state (0V), keeping MOSFET off
+  pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+  // check if an ir signal has been received
+  if (IrReceiver.decode()) {
+    
+    // store received ir command as 16-bit unsigned integer
+    uint16_t code = IrReceiver.decodedIRData.command;
+    
+    // print label to serial monitor for debugging
+    Serial.print("Received code: ");
+    
+    // print the actual code value received from remote
+    Serial.println(code);
+    
+    // --- power button: toggle led strip on/off ---
+    switch (code) {
+      // if the "power" button code is received
+      case 69:
+        // toggle led state between on and off
+        ledOn = !ledOn;
+        
+        // if led should be on
+        if (ledOn) {
+          // turn led fully on by setting PWM duty cycle to 100%
+          // this applies 5V to gate through 100Ω resistor, turning MOSFET fully on
+          analogWrite(LED_PIN, 255);
+        } else {
+          // turn led off by setting PWM duty cycle to 0%
+          // this applies 0V to gate, turning MOSFET off
+          analogWrite(LED_PIN, 0);
+        }
+        break;
+    }
+    
+    // --- up button: increase brightness ---
+    // if "up" button pressed (code 9) and led is currently on
+    if (code == 9 && ledOn) {
+      // increase brightness by 25 units
+      brightness += 25;
+      
+      // cap brightness at maximum value of 255
+      if (brightness > 255) brightness = 255;
+      
+      // apply new brightness to led using PWM
+      // higher values = longer ON time per cycle = brighter LED
+      // MOSFET switches more frequently at higher duty cycle
+      analogWrite(LED_PIN, brightness);
+      
+      // print feedback to serial monitor
+      Serial.print("Brightness increased to ");
+      Serial.println(brightness);
+    }
+    
+    // --- down button: decrease brightness ---
+    // if "down" button pressed (code 7) and led is currently on
+    if (code == 7 && ledOn) {
+      // decrease brightness by 25 units
+      brightness -= 25;
+      
+      // prevent going below minimum value of 0
+      if (brightness < 0) brightness = 0;
+      
+      // apply new brightness to led using PWM
+      // lower values = shorter ON time per cycle = dimmer LED
+      // MOSFET spends more time OFF at lower duty cycle
+      analogWrite(LED_PIN, brightness);
+      
+      // print feedback to serial monitor
+      Serial.print("Brightness decreased to ");
+      Serial.println(brightness);
+    }
+    
+    // ready the receiver to receive the next ir signal
+    IrReceiver.resume();
+  }
+}
+</code></pre>
+    <p>
+      <strong>Key Code Features:</strong>
+    </p>
+    <ul>
+      <li><strong>Library usage:</strong> IRremote library handles IR signal decoding</li>
+      <li><strong>analogWrite():</strong> Used to control MOSFET gate voltage via PWM (0-255 values map to 0-100% duty cycle)</li>
+      <li><strong>pinMode() initialization:</strong> LED_PIN set as OUTPUT, starting at LOW (0V) state to keep MOSFET off during startup</li>
+      <li><strong>Logic separation:</strong> Arduino controls gate voltage with logic-level signals (0-5V), external 12V supply powers the high-current LED strip load</li>
+    </ul>
+  </div>
+
+  <div class="container">
+    <h2>Additional Questions</h2>
+
+    <h3>1: What is the absolute maximum current between pins 2 and 3 of the DMT6009LCT MOSFET?</h3>
+    <p>
+      Based on the DMT6009LCT datasheet, pins 2 and 3 are the Drain and Source pins respectively. 
+      The absolute maximum ratings section shows:
+    </p>
+    <ul>
+      <li><strong>Continuous Drain Current (I<sub>D</sub>) at T<sub>A</sub> = 25°C:</strong> <strong>60A</strong></li>
+      <li><strong>Continuous Drain Current (I<sub>D</sub>) at T<sub>A</sub> = 70°C:</strong> 43A (derated for temperature)</li>
+      <li><strong>Pulsed Drain Current (I<sub>DM</sub>):</strong> 240A (for brief pulses)</li>
+    </ul>
+    <p>
+      The absolute maximum <strong>continuous</strong> current between Drain (pin 2) and Source (pin 3) is 
+      <strong>60 amperes</strong> at room temperature (25°C). This rating assumes adequate heat sinking and 
+      proper thermal management. At elevated ambient temperatures (70°C), this derates to 43A.
+    </p>

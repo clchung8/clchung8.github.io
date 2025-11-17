@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+    <title>Assignment 6 - Talking to the web!</title>
+    
+    <!--p5.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.js"></script>
+    <!-- p5.js web serial library -->
+    <script src="https://unpkg.com/@gohai/p5.webserial@^1/libraries/p5.webserial.js"></script>
+    
+    <style>
+      body {
+  font-family: Arial, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white;
+}
+h1 {
+  color: #333;
+  border-bottom: 2px solid #333;
+  padding-bottom: 10px;
+}
+h2 {
+  color: #333;
+  margin-top: 30px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+}
+h3 {
+  color: #333;
+}
+p {
+  line-height: 1.6;
+}
+.header {
+  margin: 30px 0;
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+.section {
+  margin: 30px 0;
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+.interactive-section {
+  text-align: center;
+  padding: 20px;
+  border: 1px solid #ccc;
+  margin: 20px 0;
+}
+.interactive-section canvas {
+  display: block;
+  margin: 20px auto;
+  border: 2px solid #333;
+}
+.image-section {
+  margin: 30px 0;
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+.image-section img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 10px auto;
+  border: 1px solid #ccc;
+}
+.image-section .image-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.image-section .image-row img {
+  flex: 1;
+  max-width: 30%;
+  min-width: 200px;
+}
+caption {
+  display: block;
+  margin: 15px 0;
+  font-style: italic;
+  color: #666;
+  line-height: 1.6;
+}
+pre {
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  padding: 15px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.5;
+}
+code {
+  font-family: 'Courier New', monospace;
+}
+.calculation-section {
+  margin: 30px 0;
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+button {
+  background-color: #333;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 10px;
+}
+button:hover {
+  background-color: #555;
+}
+.status {
+  margin: 10px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  font-family: monospace;
+}
+    </style>
+  </head>
+  <body>
+    <h1>Assignment 6 - Joystick Controlled Eyes</h1>
+    
+    <div class="header">
+      <p>This project uses a joystick to control animated eyes that follow your joystick movements. When you let go of the joystick (it returns to center), the eyes look straight ahead. An RGB LED lights up when the joystick is moved, changing colors based on direction, and turns off when centered.</p>
+    </div>
+
+    <div class="interactive-section">
+      <h2>Control your own pair of eyes</h2>
+      <p>Click the button below to connect to your Arduino, then move the joystick to control the eyes.</p>
+      <div id="canvas-container"></div>
+      <div class="status" id="status">Status: Not connected</div>
+    </div>
+
+    <div class="image-section">
+      <caption><strong>Demo GIF:</strong> The eyes follow the joystick movements in real-time. When the joystick returns to center, the eyes look straight ahead. The RGB LED lights up with different colors depending on the direction of movement (red for right, blue for left, green for vertical). The LED turns off when the joystick is centered.</caption>
+      <img src="Media/a6gif.gif" alt="Circuit and webpage demonstration" />
+    </div>
+
+    <div class="image-section">
+      <caption><strong>Schematic</strong>
+        <img src="Media/a6sch.png" alt="Circuit schematic" />
+    </div>
+    
+    <div class="image-section">
+        <caption><strong>Circuit
+        <div class="image-row">
+            <img src="Media/a6ard.jpg" alt="Arduino Pins" />
+            <img src="Media/a6cir.jpg" alt="Physical circuit" />
+            <img src="Media/a6brb.jpg" alt="Breadboard" />
+        </div>
+    </div>
+
+    <div class="calculation-section">
+      <h3>Key Calculations & Explanations</h3>
+      <p><strong>Joystick analogRead() values:</strong> The joystick returns values from 0-1023 on each axis. The center position is approximately 512. When pushed left, X reads ~0; when pushed right, X reads ~1023. When pushed up, Y reads ~0; when pushed down, Y reads ~1023. These raw values are sent to p5.js via serial communication.</p>
+      
+      <p><strong>RGB LED Resistor Calculation:</strong> Using Ohm's Law for each color channel: R = (V_supply - V_led) / I_led = (5V - 2V) / 0.015A = 200Ω. I used standard 220Ω resistors for all three channels (red, green, blue).</p>
+      
+      <p><strong>Detecting joystick movement:</strong> I defined a "deadzone" of 50 units around the center value (512). If joyX or joyY values fall outside the range of 462-562, the joystick is considered "in use" and the RGB LED lights up. When values return to the deadzone, the LED turns off and the eyes look straight ahead.</p>
+      
+      <p><strong>Mapping joystick to screen coordinates:</strong> In p5.js, I mapped the joystick values (0-1023) to the canvas size (0-400 pixels) using the map() function. This allows smooth tracking across the entire screen. When the joystick is centered, the target coordinates default to the center of the canvas (200, 200), making the eyes look straight ahead.</p>
+      
+      <p><strong>RGB color logic:</strong> The LED color changes based on direction: moving right increases red, moving left increases blue, and vertical movement adds green. This creates intuitive visual feedback for joystick direction.</p>
+    </div>
+
+    <h2>Arduino Code</h2>
+    <pre><code>// pin definitions
+int joyX = A0;
+int joyY = A1;
+int redPin = 9;
+int greenPin = 10;
+int bluePin = 11;
+
+void setup() {
+  // initialize serial communication at 9600 baud rate
+  Serial.begin(9600);
+  
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+}
+
+void loop() {
+  // Read analog value from joystick on both axis (0-1023)
+  int xVal = analogRead(joyX);
+  int yVal = analogRead(joyY);
+  
+  // send joystick X value to p5.js
+  Serial.print(xVal);
+  // send comma separator
+  Serial.print(",");
+  // send joystick Y value to p5.js and add newline
+  Serial.println(yVal);
+  
+  if (Serial.available()) {
+    // if new data available, read the incoming command string until newline
+    String command = Serial.readStringUntil('\n');
+    
+    // "RGB,r,g,b" where r,g,b are 0-255 to control LED color
+    if (command.startsWith("RGB")) {
+      int firstComma = command.indexOf(',');
+      int secondComma = command.indexOf(',', firstComma + 1);
+      int thirdComma = command.indexOf(',', secondComma + 1);
+      
+      // red value from substring and convert to integer
+      int r = command.substring(firstComma + 1, secondComma).toInt();
+      // green value
+      int g = command.substring(secondComma + 1, thirdComma).toInt();
+      // blue value
+      int b = command.substring(thirdComma + 1).toInt();
+      
+      // write color values
+      analogWrite(redPin, r);
+      analogWrite(greenPin, g);
+      analogWrite(bluePin, b);
+    }
+  }
+  delay(50);
+}</code></pre>
+
+    <h2>js Code</h2>
+    <pre><code>
+      // variables for joystick position
+      // starting at center values (512 is middle of 0-1023 range)
+      let joyX = 512;
+      let joyY = 512;
+
+      // deadzone threshold for joystick center position
+      const DEADZONE = 50;
+      // center position of joystick
+      const CENTER = 512;
+
+      // web Serial variables
+      let port;
+      let connectBtn;
+
+      // baud rate must match arduino
+      const BAUD_RATE = 9600;
+
+      function setup() {
+        // create a 400x400 pixel canvas
+        let canvas = createCanvas(400, 400);
+        // put canvas in the canvas-container div
+        canvas.parent('canvas-container');
+        
+        // use RGB color mode
+        colorMode(RGB);
+        // set angle mode to degrees for easier angle calculations
+        angleMode(DEGREES);
+        
+        // initialize web serial connection
+        setupSerial();
+      }
+
+      function draw() {
+        // set black background
+        background(0);
+        
+        // read data from Arduino via serial port
+        if (port && port.available()) {
+          // read until newline character and remove whitespace
+          let data = port.readUntil("\n").trim();
+          
+          // split the comma-separated values into an array
+          let values = data.split(",");
+          
+          // check that we received both values
+          if (values.length === 2) {
+            // parse X joystick value from string to integer
+            joyX = int(values[0]);
+            // parse Y joystick value from string to integer
+            joyY = int(values[1]);
+            
+            // update status display
+            document.getElementById('status').textContent = 
+              'Status: Connected | Joystick X: ' + joyX + ' Y: ' + joyY;
+          }
+        }
+        
+        // calculate if joystick is being used (outside deadzone)
+        let xActive = abs(joyX - CENTER) > DEADZONE;
+        let yActive = abs(joyY - CENTER) > DEADZONE;
+        
+        // variable to hold target coordinates
+        let targetX, targetY;
+        
+        // if joystick is centered, eyes look straight ahead (center of canvas)
+        if (!xActive && !yActive) {
+          // Set target to center of canvas
+          targetX = width / 2;
+          targetY = height / 2;
+          
+          // turn off RGB LED when centered
+          sendRGBCommand(0, 0, 0);
+        } else {
+          // map joystick values (0-1023) to canvas coordinates (0-400)
+          targetX = map(joyX, 0, 1023, 0, width);
+          targetY = map(joyY, 0, 1023, 0, height);
+          
+          // calculate RGB values based on joystick position
+          // map X position to red value (right = more red)
+          let r = map(joyX, 0, 1023, 0, 255);
+          // Map Y position to green value (down = more green)
+          let g = map(joyY, 0, 1023, 0, 255);
+          // Map X position inversely to blue value (left = more blue)
+          let b = map(joyX, 1023, 0, 0, 255);
+          
+          // constrain values to 0-255 range
+          r = constrain(r, 0, 255);
+          g = constrain(g, 0, 255);
+          b = constrain(b, 0, 255);
+          
+          // send RGB command to Arduino with calculated color values
+          sendRGBCommand(r, g, b);
+        }
+        
+        // draw the left eye
+        drawEye(150, 200, targetX, targetY);
+        // draw the right eye
+        drawEye(250, 200, targetX, targetY);
+      }
+
+      // function to draw a single eye
+      // eyeX, eyeY: position of the eye center
+      // targetX, targetY: position the eye should look at
+      function drawEye(eyeX, eyeY, targetX, targetY) {
+        // calculate angle from eye center to target position
+        let angle = atan2(targetY - eyeY, targetX - eyeX);
+        // calculate distance from eye center to target
+        let distance = dist(eyeX, eyeY, targetX, targetY);
+        
+        // save current  state
+        push();
+        // move origin to eye center
+        translate(eyeX, eyeY);
+        
+        // draw white outer circle (eye white)
+        fill(255);
+        ellipse(0, 0, 50, 50);
+        
+        // rotate to face the target angle
+        rotate(angle);
+        
+        // map distance to pupil offset (max 12.5 pixels from center)
+        // if target is at eye center, offset is 0 (pupil centered)
+        let pupilOffset = map(distance, 0, 400, 0, 12.5);
+        pupilOffset = constrain(pupilOffset, 0, 12.5);
+        
+        // draw black pupil with offset
+        fill(0);
+        ellipse(pupilOffset, 0, 25, 25);
+        
+        // restore previous state
+        pop();
+      }
+
+      // function to send RGB color command to arduino
+      // r, g, b: color values from 0-255
+      function sendRGBCommand(r, g, b) {
+        if (port && port.opened()) {
+          let command = "RGB," + int(r) + "," + int(g) + "," + int(b) + "\n";
+          port.write(command);
+        }
+      }
+
+      // setup web serial connection
+      function setupSerial() {
+        port = createSerial();
+        
+        // get list of previously used serial ports
+        let usedPorts = usedSerialPorts();
+        // if we've connected before, automatically reconnect
+        if (usedPorts.length > 0) {
+          // open the first previously used port
+          port.open(usedPorts[0], BAUD_RATE);
+        }
+        
+        // create connect button for user to manually connect
+        connectBtn = createButton("Connect to Arduino");
+        connectBtn.parent('canvas-container');
+        connectBtn.mousePressed(onConnectButtonClicked);
+      }
+
+      // handle connect button clicks
+      function onConnectButtonClicked() {
+        // if port is not open
+        if (!port.opened()) {
+          // open the serial port at specified baud rate
+          port.open(BAUD_RATE);
+          // update button text
+          connectBtn.html("Disconnect");
+        } else {
+          // close the serial port
+          port.close();
+          // =update button text
+          connectBtn.html("Connect to Arduino");
+          // update status
+          document.getElementById('status').textContent = 'Status: Not connected';
+        }
+      }
+    </code></pre>
+
+    <h2>AI Usage</h2>
+    <p>For this assignment, I used Claude AI to help me understand how to integrate the live demonstration window on the webpage. </p>
+
+  <script>
+      let joyX = 512;
+      let joyY = 512;
+
+      const DEADZONE = 50;
+      const CENTER = 512;
+
+      let port;
+      let connectBtn;
+
+      const BAUD_RATE = 9600;
+
+      function setup() {
+        let canvas = createCanvas(400, 400);
+        canvas.parent('canvas-container');
+        
+        colorMode(RGB);
+        angleMode(DEGREES);
+        
+        setupSerial();
+        
+        describe('Two eyes that follow joystick movements and return to center when released.');
+      }
+
+      function draw() {
+        background(0);
+        
+        if (port && port.available()) {
+          let data = port.readUntil("\n").trim();
+          
+          let values = data.split(",");
+          
+          if (values.length === 2) {
+            joyX = int(values[0]);
+            joyY = int(values[1]);
+            
+            document.getElementById('status').textContent = 
+              'Status: Connected | Joystick X: ' + joyX + ' Y: ' + joyY;
+          }
+        }
+        
+        let xActive = abs(joyX - CENTER) > DEADZONE;
+        let yActive = abs(joyY - CENTER) > DEADZONE;
+        
+        let targetX, targetY;
+        
+        if (!xActive && !yActive) {
+          targetX = width / 2;
+          targetY = height / 2;
+          
+          sendRGBCommand(0, 0, 0);
+        } else {
+          targetX = map(joyX, 0, 1023, 0, width);
+          targetY = map(joyY, 0, 1023, 0, height);
+          
+          let r = map(joyX, 0, 1023, 0, 255);
+          let g = map(joyY, 0, 1023, 0, 255);
+          let b = map(joyX, 1023, 0, 0, 255);
+          
+          r = constrain(r, 0, 255);
+          g = constrain(g, 0, 255);
+          b = constrain(b, 0, 255);
+          
+          sendRGBCommand(r, g, b);
+        }
+        
+        drawEye(150, 200, targetX, targetY);
+        drawEye(250, 200, targetX, targetY);
+      }
+
+      function drawEye(eyeX, eyeY, targetX, targetY) {
+        let angle = atan2(targetY - eyeY, targetX - eyeX);
+        
+        push();
+        translate(eyeX, eyeY);
+        
+        fill(255);
+        noStroke();
+        ellipse(0, 0, 50, 50);
+        
+        rotate(angle);
+        
+        let dx = targetX - eyeX;
+        let dy = targetY - eyeY;
+        let distance = sqrt(dx * dx + dy * dy);
+        
+        let maxOffset = 12.5;
+        let pupilOffset = map(distance, 0, 200, 0, maxOffset);
+        pupilOffset = constrain(pupilOffset, 0, maxOffset);
+        
+        fill(0);
+        ellipse(pupilOffset, 0, 25, 25);
+        
+        pop();
+      }
+
+      function sendRGBCommand(r, g, b) {
+        if (port && port.opened()) {
+          let command = "RGB," + int(r) + "," + int(g) + "," + int(b) + "\n";
+          port.write(command);
+        }
+      }
+
+      function setupSerial() {
+        port = createSerial();
+        
+        let usedPorts = usedSerialPorts();
+        if (usedPorts.length > 0) {
+          port.open(usedPorts[0], BAUD_RATE);
+        }
+        
+        connectBtn = createButton("Connect to Arduino");
+        connectBtn.parent('canvas-container');
+        connectBtn.mousePressed(onConnectButtonClicked);
+      }
+
+      function onConnectButtonClicked() {
+        if (!port.opened()) {
+          port.open(BAUD_RATE);
+          connectBtn.html("Disconnect");
+        } else {
+          port.close();
+          connectBtn.html("Connect to Arduino");
+          document.getElementById('status').textContent = 'Status: Not connected';
+        }
+      }
+    </script>
+  </body>
+</html>
+</html>

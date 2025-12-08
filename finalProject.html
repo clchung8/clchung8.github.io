@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trubbish Can! - Final Documentation by Christian Chung</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Poppins", Arial, sans-serif;
+      background: linear-gradient(180deg, #9bcc8b 0%, #cfe3c9 100%);
+      color: #1a1a1a;
+      margin: 0;
+      padding: 40px;
+      line-height: 1.6;
+      background-attachment: fixed;
+    }
+
+    .container {
+      max-width: 850px;
+      background: #ffffffd9;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      margin: auto;
+      border: 3px solid #3f6d3f;
+      backdrop-filter: blur(4px);
+    }
+
+    h1 {
+      text-align: center;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 2.2em;
+      color: #2f522f;
+      text-shadow: 2px 2px #e2e2e2, 4px 4px #203820;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1em;
+      color: #355a35;
+      margin-top: 50px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    h3 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.75em;
+      color: #4a7548;
+      margin-top: 30px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    p {
+      margin-top: 10px;
+    }
+
+    ul {
+      margin-top: 10px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 1em;
+      color: #444;
+      margin-bottom: 30px;
+    }
+
+    .image-container {
+      text-align: center;
+      margin-top: 25px;
+      margin-bottom: 25px;
+    }
+
+    .image-container img {
+      max-width: 100%;
+      border-radius: 12px;
+      border: 2px solid #4a7548;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .image-container p {
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    .video-container {
+      text-align: center;
+      margin-top: 25px;
+      margin-bottom: 25px;
+    }
+
+    .video-container iframe {
+      max-width: 100%;
+      border-radius: 12px;
+      border: 2px solid #4a7548;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .video-container p {
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    .code-block {
+      background: #f5f5f5;
+      border: 2px solid #4a7548;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 15px;
+      margin-bottom: 15px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      line-height: 1.4;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 0.85em;
+      color: #666;
+      margin-top: 50px;
+    }
+
+    /* Pokéball divider */
+    .divider {
+      text-align: center;
+      margin: 40px 0;
+    }
+
+    .pokeball {
+      width: 60px;
+      height: 60px;
+      border: 4px solid #222;
+      border-radius: 50%;
+      background: linear-gradient(to bottom, #e53935 50%, white 50%);
+      display: inline-block;
+      position: relative;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .pokeball::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: #222;
+      transform: translateY(-50%);
+    }
+
+    .pokeball::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border: 4px solid #222;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <p class="subtitle"><strong>Final Project Documentation</strong></p>
+    <h1>Trubbish Can!</h1>
+    <p class="subtitle"><strong>Christian Chung | HCDE 439 Physical Computing</strong></p>
+
+    <div class="image-container">
+      <img src="./Media/finalProduct.jpg" alt="Completed Trubbish Can automatic trash bin">
+      <p>The completed Trubbish Can in action!</p>
+    </div>
+
+    <h2>Concept</h2>
+    <p>
+      Trubbish Can is a Pokémon-themed automatic trash bin that brings personality and fun to everyday waste disposal
+      (and is currrently being reprinted due to improper scaling). 
+      Inspired by the Poison-type Pokémon Trubbish, this project transforms a mundane desk accessory into an interactive 
+      device that responds to user presence. When you bring trash near the opening, an ultrasonic sensor detects your hand 
+      and automatically opens the lid using a servo motor. After a brief delay, the lid closes on its own, keeping the bin 
+      tidy and contained.
+    </p>
+    <p>
+      The motivation behind this project was simple: my desk trash bin was unsightly and boring. By combining physical 
+      computing skills with 3D design and a dash of Pokémon nostalgia, I designed a functional product that makes throwing 
+      away trash just a little bit more enjoyable. This project integrates sensor input, motor output, and custom enclosures 
+      to demonstrate the complete product development cycle from concept to working prototype.
+    </p>
+
+    <div class="divider">
+      <div class="pokeball"></div>
+    </div>
+
+    <h2>Demo (Temporary)</h2>
+    <div class="image-container">
+      <img src="./Media/fPDemo.gif" alt="Trubbish Can demonstration">
+      <p>The Trubbish Can (Hatsune Miku) automatically opening when the camera is detected!</p>
+    </div>
+
+    <div class="divider">
+      <div class="pokeball"></div>
+    </div>
+
+    <h2>Technical Implementation</h2>
+    
+    <h3>Bill of Materials</h3>
+    <ul>
+      <li><strong>Arduino Uno</strong></li>
+      <li><strong>HC-SR04 Ultrasonic Sensor</strong></li>
+      <li><strong>SG90 Micro Servo Motor</strong></li>
+      <li><strong>AC Adapter</strong></li>
+      <li><strong>Wires</strong></li>
+      <li><strong>3D Printed Parts</strong></li>
+      <li><strong>Hot Glue</strong></li>
+    </ul>
+
+    <h3>Circuit Schematic</h3>
+    <div class="image-container">
+      <img src="./Media/fPSchematic.png" alt="Circuit schematic for Trubbish Can">
+      <p>Circuit schematic showing Arduino, ultrasonic sensor, and servo connections</p>
+    </div>
+
+    <h3>Circuit Diagram</h3>
+    <div class="image-container">
+      <img src="./Media/fPCircuit.png" alt="Physical circuit layout">
+      <p>Physical circuit layout before integration into the enclosure</p>
+    </div>
+
+    <h3>How It Works</h3>
+    <p>
+      The Trubbish Can operates using a simple sensor-actuator control loop. The HC-SR04 ultrasonic sensor 
+      continuously measures the distance to objects in front of the bin. The sensor works by sending out an ultrasonic 
+      pulse from the trigger pin, which reflects off nearby objects and returns to the echo pin. The Arduino measures 
+      the duration of this pulse and calculates the distance using the formula: distance = (duration/2) / 29, where 
+      the division by 2 accounts for the round-trip travel time, and 29 is the conversion factor from microseconds 
+      to centimeters based on the speed of sound.
+    </p>
+    <p>
+      When an object (hand or trash) comes within 50cm of the sensor and produces a valid reading (distance > 0), 
+      the Arduino commands the SG90 servo motor to rotate to 50 degrees, which opens the lid. The system then holds 
+      this open position for 3 seconds (3000 milliseconds) using a delay. This gives the user enough time to put 
+      trash into the bin. After the 3-second delay, or if no object is detected within range, the servo 
+      rotates to 160 degrees to close the lid. The main loop repeats every 60 milliseconds, which is the suggested 
+      measurement cycle for the ultrasonic sensor to avoid interference between readings.
+    </p>
+    <p>
+      The control logic is simple: it uses a conditional statement to check if the distance reading is both 
+      less than or equal to 50cm and greater than 0 (to filter out invalid readings). If this condition is met, the 
+      lid opens; otherwise, it closes. This means the lid will automatically close either when no object is detected 
+      or when the 3-second timer expires after opening.
+    </p>
+    <p>
+      The physical design features a 3D-printed enclosure styled after the Pokémon Trubbish, with the servo mounted 
+      internally and connected to the lid via a rotating arm. The ultrasonic sensor is positioned at the front of the 
+      bin, with the trigger pin connected to digital pin 6 and the echo pin connected to digital pin 5. The servo 
+      is connected to digital pin 3. Most of the electronics are inside the base, powered by a AC wall adapter for a constant 9V.
+    </p>
+
+    <h3>Arduino Code</h3>
+    <div class="code-block">
+<pre>
+#include<Servo.h>
+
+// create servo object and define sensor pins
+Servo servo;
+int const trigPin = 6;
+int const echoPin = 5;
+
+void setup() {
+    pinMode(trigPin, OUTPUT);   // trig sends output
+    pinMode(echoPin, INPUT);    // echo receives reflected input
+    servo.attach(3);            // attach servo to pin 3
+}
+
+void loop() {
+    int duration, distance;         // store duration and distance
+    digitalWrite(trigPin, HIGH);    // start pulse
+    delay(1);                       // ...
+    digitalWrite(trigPin, LOW);     // end pulse
+    
+    duration = pulseIn(echoPin, HIGH);  // record pulse input duration
+    distance = (duration/2) / 29;       // distance is half the duration divided by 29 (from datasheet)
+ 
+    if (distance <= 50 && distance > 0) {    // if distance < 0.5 meter and valid reading
+        servo.write(50);                    // rotate to 50 deg (open)
+        delay(3000);                        // ...
+    } 
+    else {
+        servo.write(160);                   // rotate to 160 (closed)
+    }
+
+delay(60);// suggested measurement cycle
+}
+</pre>
+    </div>
+
+    <h3>Design and Assembly Process</h3>
+    <div class="image-container">
+      <img src="./Media/fPPrints.png" alt="3D printed parts">
+      <p>3D printed components</p>
+    </div>
+    
+    <div class="image-container">
+      <img src="./Media/fPElectronics.png" alt="Electronics assembly">
+      <p>Testing electronics before final assembly</p>
+    </div>
+    
+    <div class="image-container">
+      <img src="./Media/fPAssembly.jpg" alt="Final assembly">
+      <p>Integrating the circuit into the 3D printed enclosure (Almost ready!)</p>
+    </div>
+
+    <div class="divider">
+      <div class="pokeball"></div>
+    </div>
+
+    <h2>Challenges and Solutions</h2>
+    <p>
+      <strong>Biggest Challenge: Logistics</strong><br>
+      I have been so busy with other obligations, I poorly planned time out to iterate on teh design and print parts
+      in time. No solution here besides better time managemnent in the future!
+    </p>
+    <p>
+      <strong>Challenge 1: CAD Design and Mechanical Integration</strong><br>
+      The mechanical design and CAD work ended up being the most difficult aspects of this project. Creating a 
+      3D model that could accommodate all the electronics while maintaining the Trubbish aesthetic required multiple 
+      iterations. Learning to translate the concept in my head into precise CAD geometry 
+      was a steep learning curve. My first print was far too small and couldn't contain the components.
+    </p>
+    <p>
+      <strong>Challenge 2: Electronics Layout and Concealment</strong><br>
+      Figuring out how to arrange and hide the electronics within the enclosure was surprisingly challenging. I had to 
+      plan the internal layout to ensure wires could reach between components without tangling, while also making sure 
+      everything fit within the limited space. Despite my best efforts to make the electronics discreet, some components 
+      still protrude from the enclosure. The ultrasonic sensor and some wiring remain partially visible.
+    </p>
+    <p>
+      <strong>Challenge 3: Servo Positioning</strong><br>
+      Determining the correct servo angles for open and closed positions required iteration. Through testing, I found 
+      that 50 degrees provides a good opening angle while 160 degrees fully closes the lid. These angles work well with 
+      the mechanical design of the lid arm and provide smooth, reliable operation.
+    </p>
+
+    <div class="divider">
+      <div class="pokeball"></div>
+    </div>
+
+    <h2>Reflection</h2>
+    <p>
+      This project combines physical computing concepts with product design to create a functional and 
+      engaging product. The integration of sensor input and motor output demonstrates the cprinciples 
+      we learned throughout HCDE 439, and the custom 3D-printed enclosure (begins to) shows how electronics can be packaged into 
+      a complete product.
+    </p>
+    <p>
+      If I were to continue developing this project, I would want to dive deeper into the creative aspects and paint the exterior
+      to more closely resemble Trubbish. Additionally, I woulda also want to explore different ways to implement the opening
+      mechanism, like having the mouth open instead of the lid.
+    </p>
+    <p>
+      Overall, the Trubbish Can achieves its goal of transforming a mundane object into something fun and interactive. 
+      It demonstrates that with creativity and technical skills, even simple everyday products can be reimagined in 
+      delightful ways.
+    </p>
+
+    <div class="divider">
+      <div class="pokeball"></div>
+    </div>
+
+    <div class="footer">
+      HCDE 439 — Physical Computing Final Project<br>
+      December 2025 | Christian Chung
+    </div>
+  </div>
+</body>
+</html>
